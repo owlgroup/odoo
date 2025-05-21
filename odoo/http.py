@@ -2351,16 +2351,6 @@ class Application:
             server that this application must call in order to send the
             HTTP response status line and the response headers.
         """
-        if environ['REQUEST_METHOD'] == 'OPTIONS':
-            headers = [
-            ('Access-Control-Allow-Origin', '*'),
-            ('Access-Control-Allow-Methods', 'POST, GET, OPTIONS'),
-            ('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, Authorization'),
-            ('Access-Control-Allow-Credentials', 'true'),
-            ]
-            start_response('200 OK', headers)
-            return [b'']
-
         current_thread = threading.current_thread()
         current_thread.query_count = 0
         current_thread.query_time = 0
@@ -2409,8 +2399,6 @@ class Application:
                         response = request._serve_nodb()
                 else:
                     response = request._serve_nodb()
-                response.headers['Access-Control-Allow-Origin'] = '*'
-                response.headers['Access-Control-Allow-Credentials'] = 'true'
                 return response(environ, start_response)
 
             except Exception as exc:
