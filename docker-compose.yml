@@ -23,7 +23,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - "5444:5432"   # thêm dòng này để mở port db ra ngoài
+      - "5445:5432"   # thêm dòng này để mở port db ra ngoài
 
   nginx:
     image: nginx:stable-alpine
