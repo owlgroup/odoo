@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout Github') {
             steps {
-                git branch: '18.0', credentialsId: 'jen-doc-git', url: 'https://github.com/owlgroup/odoo.git'
+                git branch: '18.0', url: 'https://github.com/owlgroup/odoo.git'
             }
         }
 
@@ -12,8 +12,9 @@ pipeline {
             steps {
                 sh '''
                     python3 -m venv venv
-                    source venv/bin/activate
-                    pip install -r requirements.txt || echo "Không tìm thấy requirements.txt"
+                    . venv/bin/activate
+                    pip install wheel
+                    pip install -r requirements.txt
                 '''
             }
         }
@@ -21,9 +22,8 @@ pipeline {
         stage('Test Code') {
             steps {
                 sh '''
-                    source venv/bin/activate
-                    echo "👉 Running tests..."
-                    python3 -m unittest discover -s tests || echo "✅ Không có test nào được chạy"
+                    . venv/bin/activate
+                    python3 odoo/odoo-bin --test-enable --stop-after-init -d test_db --addons-path=addons
                 '''
             }
         }
@@ -31,7 +31,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ Build completed successfully!'
+            echo '✅ Build success!'
         }
         failure {
             echo '❌ Build failed. Check logs.'
