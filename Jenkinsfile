@@ -23,7 +23,7 @@ pipeline {
             steps {
                 sh '''
                     . venv/bin/activate
-                    python3 odoo/odoo-bin --test-enable --stop-after-init -d test_db --addons-path=addons
+                    python3 odoo-bin --test-enable --stop-after-init -d test_db --addons-path=addons
                 '''
             }
         }
