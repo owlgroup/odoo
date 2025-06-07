@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        DOCKER_HOST = 'unix:///var/run/docker.sock'
+    }
     triggers {
         githubPush()
     }
@@ -22,7 +25,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("nodeimage" + "$BUILD_NUMBER")
+                    docker.build("nodeimage${env.BUILD_NUMBER}")
                 }
             }
         }
