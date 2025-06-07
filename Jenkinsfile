@@ -24,13 +24,22 @@ pipeline {
                 sh 'docker build -t nodeimage${env.BUILD_NUMBER} .'
             }
         }
+        stage('Deploy to Localhost') {
+            steps {
+                sh '''
+                    docker stop odoo-website || true
+                    docker rm odoo-website || true
+                    docker run -d --name odoo-website -p 8069:8069 nodeimage${env.BUILD_NUMBER}
+                '''
+            }
+        }
     }
     post {
         success {
-            echo '✅ Build success!'
+            echo '✅ Build and deployment success!'
         }
         failure {
-            echo '❌ Build failed. Check logs.'
+            echo '❌ Build or deployment failed. Check logs.'
         }
     }
 }
