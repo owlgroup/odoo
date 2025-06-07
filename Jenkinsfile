@@ -18,15 +18,7 @@ pipeline {
         }
         stage('Test Code') {
             steps {
-                sh '''
-                    . venv/bin/activate
-                    # Kiểm tra xem thư mục addons có chứa các addons hợp lệ hay không
-                    if [ -z "$(ls -A addons)" ]; then
-                        echo "Thư mục addons không chứa addons hợp lệ. Vui lòng thêm addons vào thư mục này."
-                        exit 1
-                    fi
-                    python3 odoo-bin --test-enable --stop-after-init -d odoo-database --config=odoo.conf
-                '''
+                sh 'npm test'
             }
         }
     }
