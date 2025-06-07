@@ -2,8 +2,17 @@ pipeline {
     agent any
     environment {
         IMAGE_TAG = "nodeimage${env.BUILD_NUMBER}"
+        DOCKER_HOST = "unix:///var/run/docker.sock"
     }
     stages {
+        stage('Check Docker Environment') {
+            steps {
+                sh '''
+                    echo "DOCKER_HOST: $DOCKER_HOST"
+                    docker info || echo "Docker daemon not accessible"
+                '''
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 sh '''
