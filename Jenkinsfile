@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    environment {
-        DOCKER_HOST = 'tcp://khoadue.me:2375'  // Thay thế bằng URL Docker daemon của bạn
-    }
     triggers {
         githubPush()
     }
@@ -24,9 +21,7 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("nodeimage${env.BUILD_NUMBER}")
-                }
+                sh 'docker build -t nodeimage${env.BUILD_NUMBER} .'
             }
         }
     }
