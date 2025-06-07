@@ -11,7 +11,7 @@ sys.argv += [
     '--db_port=5432',
     '--db_user=odoo',
     '--db_password=odoo',
-    '--addons-path=addons,custom-addons'
+    '--addons-path=addons'
 ]
 
 if __name__ == "__main__":
