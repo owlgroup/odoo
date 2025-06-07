@@ -8,8 +8,14 @@ services:
       - "8069:8069"
     environment:
       - HOST=db
+      - PORT=5432
       - USER=odoo
       - PASSWORD=odoo
+      - DATABASE=postgres
+      - PGHOST=db
+      - PGPORT=5432
+      - PGUSER=odoo
+      - PGPASSWORD=odoo
     volumes:
       - odoo-data:/var/lib/odoo
       - ./custom-addons:/mnt/extra-addons
