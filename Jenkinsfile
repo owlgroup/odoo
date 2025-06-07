@@ -5,6 +5,8 @@ pipeline {
     }
     environment {
         DOCKER_HOST = 'tcp://host.docker.internal:2375' // Kết nối với Docker Desktop
+        DOCKER_TLS_VERIFY = '' // Tắt TLS để khớp với cổng 2375
+        DOCKER_CERT_PATH = '' // Xóa DOCKER_CERT_PATH vì không dùng TLS
     }
     stages {
         stage('Debug Environment') {
@@ -12,7 +14,7 @@ pipeline {
                 sh '''
                     echo "Checking environment..."
                     env | grep -E 'DOCKER|GIT'
-                    docker -H tcp://host.docker.internal:2375 info
+                    docker info
                     ping -c 4 github.com
                     ping -c 4 hub.docker.com
                 '''
@@ -20,7 +22,6 @@ pipeline {
         }
         stage('Checkout Github') {
             steps {
-                // Thêm credentials nếu repository yêu cầu xác thực
                 git branch: '18.0', 
                     credentialsId: 'jen-doc-git', // Thay bằng ID credentials trong Jenkins
                     url: 'https://github.com/owlgroup/odoo.git'
