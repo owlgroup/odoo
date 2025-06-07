@@ -3,6 +3,9 @@ pipeline {
     triggers {
         githubPush()
     }
+    environment {
+        DOCKER_HOST = 'tcp://host.docker.internal:2375' // Kết nối với Docker Desktop
+    }
     stages {
         stage('Checkout Github') {
             steps {
@@ -14,6 +17,7 @@ pipeline {
                 sh '''
                     python3 -m venv venv
                     . venv/bin/activate
+                    pip install --upgrade pip
                     pip install wheel
                     pip install -r requirements.txt
                 '''
