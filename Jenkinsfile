@@ -17,9 +17,10 @@ pipeline {
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
                     export DOCKER_TLS_VERIFY=0
-                    # Xóa thư mục cấu hình Docker nếu tồn tại
+                    # Xóa hoàn toàn thư mục cấu hình Docker
                     rm -rf /var/jenkins_home/.docker || echo "No Docker config directory to remove"
-                    env | grep -E 'DOCKER|GIT'
+                    # Hiển thị tất cả biến môi trường liên quan đến Docker
+                    env | grep -i DOCKER || echo "No Docker environment variables found"
                     curl -s http://host.docker.internal:2375/_ping || echo "Failed to ping Docker daemon via HTTP"
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker info || echo "Failed to connect to Docker daemon"
                     curl -Is https://github.com | head -n 1
@@ -48,8 +49,9 @@ pipeline {
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
                     export DOCKER_TLS_VERIFY=0
-                    # Xóa thư mục cấu hình Docker nếu tồn tại
+                    # Xóa hoàn toàn thư mục cấu hình Docker
                     rm -rf /var/jenkins_home/.docker || echo "No Docker config directory to remove"
+                    # Đảm bảo sử dụng HTTP
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker build -t "$IMAGE_TAG" .
                 '''
             }
@@ -60,7 +62,7 @@ pipeline {
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
                     export DOCKER_TLS_VERIFY=0
-                    # Xóa thư mục cấu hình Docker nếu tồn tại
+                    # Xóa hoàn toàn thư mục cấu hình Docker
                     rm -rf /var/jenkins_home/.docker || echo "No Docker config directory to remove"
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker stop odoo-website || true
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker rm odoo-website || true
