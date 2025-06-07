@@ -4,7 +4,7 @@ pipeline {
         githubPush()
     }
     environment {
-        DOCKER_HOST = 'tcp://host.docker.internal:2375'
+        DOCKER_HOST = 'tcp://127.0.0.1:2375'
         DOCKER_TLS_VERIFY = ''
         DOCKER_CERT_PATH = ''
     }
