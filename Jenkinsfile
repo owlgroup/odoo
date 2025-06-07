@@ -18,10 +18,14 @@ pipeline {
         }
         stage('Install Node.js and npm') {
             steps {
-                // Install Node.js and npm
-                // The exact command may vary depending on your system and Jenkins setup
-                sh 'curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -'
-                sh 'sudo apt-get install -y nodejs'
+                // Install Node.js and npm using nvm
+                // This assumes nvm is already installed on the Jenkins agent
+                sh '''
+                    export NVM_DIR="$HOME/.nvm"
+                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                    nvm install 14
+                    nvm use 14
+                '''
                 
                 // Verify installation
                 sh 'node --version'
