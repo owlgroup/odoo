@@ -21,16 +21,16 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t nodeimage${env.BUILD_NUMBER} .'
+                sh "docker build -t nodeimage${env.BUILD_NUMBER} ."
             }
         }
         stage('Deploy to Localhost') {
             steps {
-                sh '''
+                sh """
                     docker stop odoo-website || true
                     docker rm odoo-website || true
                     docker run -d --name odoo-website -p 8069:8069 nodeimage${env.BUILD_NUMBER}
-                '''
+                """
             }
         }
     }
