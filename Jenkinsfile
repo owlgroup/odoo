@@ -27,7 +27,7 @@ pipeline {
         }
         stage('Checkout Github') {
             steps {
-                git branch: '18.0', credentialsId: 'github-credentials-id', url: 'https://github.com/owlgroup/odoo.git'
+                git branch: '18.0', credentialsId: 'jen-doc-git', url: 'https://github.com/owlgroup/odoo.git'
             }
         }
         stage('Install Dependencies') {
