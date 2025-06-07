@@ -9,6 +9,11 @@ pipeline {
                 git branch: '18.0', url: 'https://github.com/owlgroup/odoo.git'
             }
         }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t khoadue.me/odoo-website:latest .'
+            }
+        }
         stage('Install Dependencies') {
             steps {
                 sh '''
@@ -19,17 +24,13 @@ pipeline {
                 '''
             }
         }
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t khoadue.me/odoo-website:latest .'
-            }
-        }
+    }
     post {
         success {
-            echo '✅ Build and deployment success!'
+            echo '✅ Build success!'
         }
         failure {
-            echo '❌ Build or deployment failed. Check logs.'
+            echo '❌ Build failed. Check logs.'
         }
     }
 }
