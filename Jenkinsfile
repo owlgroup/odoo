@@ -17,6 +17,8 @@ pipeline {
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
                     export DOCKER_TLS_VERIFY=0
+                    # Xóa thư mục cấu hình Docker nếu tồn tại
+                    rm -rf /var/jenkins_home/.docker || echo "No Docker config directory to remove"
                     env | grep -E 'DOCKER|GIT'
                     curl -s http://host.docker.internal:2375/_ping || echo "Failed to ping Docker daemon via HTTP"
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker info || echo "Failed to connect to Docker daemon"
@@ -27,7 +29,7 @@ pipeline {
         }
         stage('Checkout Github') {
             steps {
-                git branch: '18.0', credentialsId: 'jen-doc-git', url: 'https://github.com/owlgroup/odoo.git'
+                git branch: '18.0', credentialsId: 'github-credentials-id', url: 'https://github.com/owlgroup/odoo.git'
             }
         }
         stage('Install Dependencies') {
@@ -46,6 +48,8 @@ pipeline {
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
                     export DOCKER_TLS_VERIFY=0
+                    # Xóa thư mục cấu hình Docker nếu tồn tại
+                    rm -rf /var/jenkins_home/.docker || echo "No Docker config directory to remove"
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker build -t "$IMAGE_TAG" .
                 '''
             }
@@ -56,6 +60,8 @@ pipeline {
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
                     export DOCKER_TLS_VERIFY=0
+                    # Xóa thư mục cấu hình Docker nếu tồn tại
+                    rm -rf /var/jenkins_home/.docker || echo "No Docker config directory to remove"
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker stop odoo-website || true
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker rm odoo-website || true
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker run -d --name odoo-website -p 8069:8069 "$IMAGE_TAG"
