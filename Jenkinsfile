@@ -13,18 +13,15 @@ pipeline {
         stage('Debug Environment') {
             steps {
                 sh '''
-                    echo "Checking environment..."
+                    echo "Kiểm tra môi trường..."
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
                     export DOCKER_TLS_VERIFY=0
-                    # Xóa hoàn toàn thư mục cấu hình Docker
-                    rm -rf /var/jenkins_home/.docker || echo "No Docker config directory to remove"
-                    # Hiển thị tất cả biến môi trường liên quan đến Docker
-                    env | grep -i DOCKER || echo "No Docker environment variables found"
-                    curl -s http://host.docker.internal:2375/_ping || echo "Failed to ping Docker daemon via HTTP"
-                    DOCKER_HOST=tcp://host.docker.internal:2375 docker info || echo "Failed to connect to Docker daemon"
-                    curl -Is https://github.com | head -n 1
-                    curl -Is https://hub.docker.com | head -n 1
+                    # Xóa thư mục cấu hình Docker nếu tồn tại
+                    rm -rf /var/jenkins_home/.docker || echo "Không thể xóa thư mục cấu hình Docker"
+                    # Kiểm tra kết nối tới Docker daemon
+                    curl -s http://host.docker.internal:2375/_ping || echo "Không thể kết nối tới Docker daemon qua HTTP"
+                    DOCKER_HOST=tcp://host.docker.internal:2375 docker info || echo "Không thể kết nối tới Docker daemon"
                 '''
             }
         }
@@ -33,25 +30,13 @@ pipeline {
                 git branch: '18.0', credentialsId: 'github-credentials-id', url: 'https://github.com/owlgroup/odoo.git'
             }
         }
-        stage('Install Dependencies') {
-            steps {
-                sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip wheel
-                    pip install -r requirements.txt || echo "Failed to install dependencies"
-                '''
-            }
-        }
         stage('Build Docker Image') {
             steps {
                 sh '''
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
                     export DOCKER_TLS_VERIFY=0
-                    # Xóa hoàn toàn thư mục cấu hình Docker
-                    rm -rf /var/jenkins_home/.docker || echo "No Docker config directory to remove"
-                    # Đảm bảo sử dụng HTTP
+                    rm -rf /var/jenkins_home/.docker || echo "Không thể xóa thư mục cấu hình Docker"
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker build -t "$IMAGE_TAG" .
                 '''
             }
@@ -62,8 +47,7 @@ pipeline {
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
                     export DOCKER_TLS_VERIFY=0
-                    # Xóa hoàn toàn thư mục cấu hình Docker
-                    rm -rf /var/jenkins_home/.docker || echo "No Docker config directory to remove"
+                    rm -rf /var/jenkins_home/.docker || echo "Không thể xóa thư mục cấu hình Docker"
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker stop odoo-website || true
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker rm odoo-website || true
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker run -d --name odoo-website -p 8069:8069 "$IMAGE_TAG"
@@ -73,10 +57,10 @@ pipeline {
     }
     post {
         success {
-            echo '✅ Build and deployment success!'
+            echo '✅ Xây dựng và triển khai thành công!'
         }
         failure {
-            echo '❌ Build or deployment failed.'
+            echo '❌ Xây dựng hoặc triển khai thất bại.'
         }
     }
 }
