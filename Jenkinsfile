@@ -2,8 +2,9 @@ pipeline {
     agent any
     environment {
         IMAGE_TAG = "nodeimage${env.BUILD_NUMBER}"
-        // DOCKER_HOST có thể được thêm nếu cần, ví dụ:
-        DOCKER_HOST = "tcp://172.28.224.1:2375"
+        // Sử dụng giá trị phù hợp dựa trên vị trí của Docker daemon
+        DOCKER_HOST = "unix:///var/run/docker.sock" // Nếu Docker trên cùng máy với Jenkins
+        // Hoặc DOCKER_HOST = "tcp://<correct-ip>:2375" // Nếu Docker trên máy khác
     }
     stages {
         stage('Check Docker Environment') {
