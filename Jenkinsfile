@@ -3,7 +3,7 @@ pipeline {
     environment {
         IMAGE_TAG = "nodeimage${env.BUILD_NUMBER}"
         // DOCKER_HOST có thể được thêm nếu cần, ví dụ:
-        // DOCKER_HOST = "tcp://localhost:2375"
+        DOCKER_HOST = "tcp://localhost:2375"
     }
     stages {
         stage('Check Docker Environment') {
