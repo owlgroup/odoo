@@ -13,8 +13,6 @@ pipeline {
                     . venv/bin/activate
                     pip install wheel
                     pip install -r requirements.txt
-                    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-                    apt-get install -y nodejs
                 '''
             }
         }
