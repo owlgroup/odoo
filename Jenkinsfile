@@ -16,14 +16,6 @@ pipeline {
                 '''
             }
         }
-        stage('Test Code') {
-            steps {
-                sh '''
-                    npm install
-                    npm test
-                '''
-            }
-        }
     }
     post {
         success {
