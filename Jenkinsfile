@@ -25,7 +25,7 @@ pipeline {
                         echo "Thư mục addons không chứa addons hợp lệ. Vui lòng thêm addons vào thư mục này."
                         exit 1
                     fi
-                    python3 odoo-bin --test-enable --stop-after-init -d odoo-database --config=$(pwd)/odoo.conf
+                    python3 odoo-bin --test-enable --stop-after-init -d odoo-database --config=odoo.conf
                 '''
             }
         }
