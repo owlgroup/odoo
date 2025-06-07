@@ -22,7 +22,7 @@ pipeline {
             steps {
                 // Thêm credentials nếu repository yêu cầu xác thực
                 git branch: '18.0', 
-                    credentialsId: 'github-credentials-id', // Thay bằng ID credentials trong Jenkins
+                    credentialsId: 'jen-doc-git', // Thay bằng ID credentials trong Jenkins
                     url: 'https://github.com/owlgroup/odoo.git'
             }
         }
