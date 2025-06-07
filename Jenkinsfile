@@ -7,6 +7,7 @@ pipeline {
         DOCKER_HOST = 'tcp://host.docker.internal:2375'
         DOCKER_TLS_VERIFY = '0'
         DOCKER_CERT_PATH = ''
+        IMAGE_TAG = "nodeimage${env.BUILD_NUMBER}"
     }
     stages {
         stage('Debug Environment') {
@@ -26,7 +27,7 @@ pipeline {
         }
         stage('Checkout Github') {
             steps {
-                git branch: '18.0', credentialsId: 'jen-doc-git', url: 'https://github.com/owlgroup/odoo.git'
+                git branch: '18.0', credentialsId: 'github-credentials-id', url: 'https://github.com/owlgroup/odoo.git'
             }
         }
         stage('Install Dependencies') {
@@ -45,7 +46,7 @@ pipeline {
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
                     export DOCKER_TLS_VERIFY=0
-                    DOCKER_HOST=tcp://host.docker.internal:2375 docker build -t nodeimage${env.BUILD_NUMBER} .
+                    DOCKER_HOST=tcp://host.docker.internal:2375 docker build -t "$IMAGE_TAG" .
                 '''
             }
         }
@@ -57,7 +58,7 @@ pipeline {
                     export DOCKER_TLS_VERIFY=0
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker stop odoo-website || true
                     DOCKER_HOST=tcp://host.docker.internal:2375 docker rm odoo-website || true
-                    DOCKER_HOST=tcp://host.docker.internal:2375 docker run -d --name odoo-website -p 8069:8069 nodeimage${env.BUILD_NUMBER}
+                    DOCKER_HOST=tcp://host.docker.internal:2375 docker run -d --name odoo-website -p 8069:8069 "$IMAGE_TAG"
                 '''
             }
         }
