@@ -2,7 +2,17 @@
 
 # set server timezone in UTC before time module imported
 __import__('os').environ['TZ'] = 'UTC'
+import sys
 import odoo
+
+# Thêm các đối số dòng lệnh để chỉ định kết nối PostgreSQL qua socket
+sys.argv += [
+    '--db_host=/tmp',
+    '--db_port=5432',
+    '--db_user=odoo',
+    '--db_password=odoo',
+    '--addons-path=addons,custom-addons'
+]
 
 if __name__ == "__main__":
     odoo.cli.main()
