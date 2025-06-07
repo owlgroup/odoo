@@ -2,12 +2,13 @@ pipeline {
     agent any
     environment {
         IMAGE_TAG = "nodeimage${env.BUILD_NUMBER}"
-        DOCKER_HOST = "tcp://localhost:2375"
+        // DOCKER_HOST có thể được thêm nếu cần, ví dụ:
+        // DOCKER_HOST = "tcp://localhost:2375"
     }
     stages {
         stage('Check Docker Environment') {
             steps {
-                bat '''
+                sh '''
                     echo "Checking Docker environment..."
                     docker info || echo "Docker daemon not accessible"
                 '''
@@ -15,17 +16,17 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                bat '''
-                    docker build -t "%IMAGE_TAG%" .
+                sh '''
+                    docker build -t "$IMAGE_TAG" .
                 '''
             }
         }
         stage('Deploy to Localhost') {
             steps {
-                bat '''
-                    docker stop odoo-website || exit 0
-                    docker rm odoo-website || exit 0
-                    docker run -d --name odoo-website -p 8069:8069 "%IMAGE_TAG%"
+                sh '''
+                    docker stop odoo-website || true
+                    docker rm odoo-website || true
+                    docker run -d --name odoo-website -p 8069:8069 "$IMAGE_TAG"
                 '''
             }
         }
