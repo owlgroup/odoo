@@ -5,7 +5,7 @@ pipeline {
     }
     environment {
         DOCKER_HOST = 'tcp://host.docker.internal:2375'
-        DOCKER_TLS_VERIFY = ''
+        DOCKER_TLS_VERIFY = '0'
         DOCKER_CERT_PATH = ''
     }
     stages {
@@ -15,8 +15,10 @@ pipeline {
                     echo "Checking environment..."
                     unset DOCKER_TLS_VERIFY
                     unset DOCKER_CERT_PATH
+                    export DOCKER_TLS_VERIFY=0
                     env | grep -E 'DOCKER|GIT'
-                    docker info
+                    curl -s http://host.docker.internal:2375/_ping || echo "Failed to ping Docker daemon via HTTP"
+                    DOCKER_HOST=tcp://host.docker.internal:2375 docker info || echo "Failed to connect to Docker daemon"
                     curl -Is https://github.com | head -n 1
                     curl -Is https://hub.docker.com | head -n 1
                 '''
@@ -24,7 +26,7 @@ pipeline {
         }
         stage('Checkout Github') {
             steps {
-                git branch: '18.0', credentialsId: 'github-credentials-id', url: 'https://github.com/owlgroup/odoo.git'
+                git branch: '18.0', credentialsId: 'jen-doc-git', url: 'https://github.com/owlgroup/odoo.git'
             }
         }
         stage('Install Dependencies') {
@@ -38,17 +40,25 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
-        steps {
-        sh "DOCKER_HOST=tcp://host.docker.internal:2375 docker build -t nodeimage${env.BUILD_NUMBER} ."
-                }
+            steps {
+                sh '''
+                    unset DOCKER_TLS_VERIFY
+                    unset DOCKER_CERT_PATH
+                    export DOCKER_TLS_VERIFY=0
+                    DOCKER_HOST=tcp://host.docker.internal:2375 docker build -t nodeimage${env.BUILD_NUMBER} .
+                '''
+            }
         }
         stage('Deploy to Localhost') {
             steps {
-                sh """
-                    docker stop odoo-website || true
-                    docker rm odoo-website || true
-                    docker run -d --name odoo-website -p 8069:8069 nodeimage${env.BUILD_NUMBER}
-                """
+                sh '''
+                    unset DOCKER_TLS_VERIFY
+                    unset DOCKER_CERT_PATH
+                    export DOCKER_TLS_VERIFY=0
+                    DOCKER_HOST=tcp://host.docker.internal:2375 docker stop odoo-website || true
+                    DOCKER_HOST=tcp://host.docker.internal:2375 docker rm odoo-website || true
+                    DOCKER_HOST=tcp://host.docker.internal:2375 docker run -d --name odoo-website -p 8069:8069 nodeimage${env.BUILD_NUMBER}
+                '''
             }
         }
     }
