@@ -16,8 +16,24 @@ pipeline {
                 '''
             }
         }
+        stage('Install Node.js and npm') {
+            steps {
+                // Install Node.js and npm
+                // The exact command may vary depending on your system and Jenkins setup
+                sh 'curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -'
+                sh 'sudo apt-get install -y nodejs'
+                
+                // Verify installation
+                sh 'node --version'
+                sh 'npm --version'
+            }
+        }
         stage('Test Code') {
             steps {
+                // Install project dependencies
+                sh 'npm install'
+                
+                // Run tests
                 sh 'npm test'
             }
         }
