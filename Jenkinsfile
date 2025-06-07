@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_HOST = 'unix:///var/run/docker.sock'
+        DOCKER_HOST = 'tcp://khoadue.me:2375'  // Thay thế bằng URL Docker daemon của bạn
     }
     triggers {
         githubPush()
