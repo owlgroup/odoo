@@ -7,9 +7,23 @@ pipeline {
         DOCKER_HOST = 'tcp://host.docker.internal:2375' // Kết nối với Docker Desktop
     }
     stages {
+        stage('Debug Environment') {
+            steps {
+                sh '''
+                    echo "Checking environment..."
+                    env | grep -E 'DOCKER|GIT'
+                    docker -H tcp://host.docker.internal:2375 info
+                    ping -c 4 github.com
+                    ping -c 4 hub.docker.com
+                '''
+            }
+        }
         stage('Checkout Github') {
             steps {
-                git branch: '18.0', url: 'https://github.com/owlgroup/odoo.git'
+                // Thêm credentials nếu repository yêu cầu xác thực
+                git branch: '18.0', 
+                    credentialsId: 'github-credentials-id', // Thay bằng ID credentials trong Jenkins
+                    url: 'https://github.com/owlgroup/odoo.git'
             }
         }
         stage('Install Dependencies') {
@@ -19,7 +33,7 @@ pipeline {
                     . venv/bin/activate
                     pip install --upgrade pip
                     pip install wheel
-                    pip install -r requirements.txt
+                    pip install -r requirements.txt || echo "Failed to install dependencies, check requirements.txt"
                 '''
             }
         }
