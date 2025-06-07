@@ -4,9 +4,9 @@ pipeline {
         githubPush()
     }
     environment {
-        DOCKER_HOST = 'tcp://host.docker.internal:2375' // Kết nối với Docker Desktop
-        DOCKER_TLS_VERIFY = '' // Tắt TLS
-        DOCKER_CERT_PATH = '' // Xóa đường dẫn chứng chỉ
+        DOCKER_HOST = 'tcp://host.docker.internal:2375'
+        DOCKER_TLS_VERIFY = ''
+        DOCKER_CERT_PATH = ''
     }
     stages {
         stage('Debug Environment') {
@@ -17,16 +17,14 @@ pipeline {
                     unset DOCKER_CERT_PATH
                     env | grep -E 'DOCKER|GIT'
                     docker info
-                    ping -c 4 github.com
-                    ping -c 4 hub.docker.com
+                    curl -Is https://github.com | head -n 1
+                    curl -Is https://hub.docker.com | head -n 1
                 '''
             }
         }
         stage('Checkout Github') {
             steps {
-                git branch: '18.0', 
-                    credentialsId: 'jen-doc-git', // Thay bằng ID credentials trong Jenkins
-                    url: 'https://github.com/owlgroup/odoo.git'
+                git branch: '18.0', credentialsId: 'github-credentials-id', url: 'https://github.com/owlgroup/odoo.git'
             }
         }
         stage('Install Dependencies') {
@@ -34,9 +32,8 @@ pipeline {
                 sh '''
                     python3 -m venv venv
                     . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install wheel
-                    pip install -r requirements.txt || echo "Failed to install dependencies, check requirements.txt"
+                    pip install --upgrade pip wheel
+                    pip install -r requirements.txt || echo "Failed to install dependencies"
                 '''
             }
         }
@@ -60,7 +57,7 @@ pipeline {
             echo '✅ Build and deployment success!'
         }
         failure {
-            echo '❌ Build or deployment failed. Check logs.'
+            echo '❌ Build or deployment failed.'
         }
     }
 }
