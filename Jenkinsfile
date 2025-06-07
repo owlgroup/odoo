@@ -4,7 +4,7 @@ pipeline {
         githubPush()
     }
     environment {
-        DOCKER_HOST = 'tcp://localhost:2375'
+        DOCKER_HOST = 'tcp://host.docker.internal:2375'
         DOCKER_TLS_VERIFY = ''
         DOCKER_CERT_PATH = ''
     }
@@ -38,9 +38,9 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
-            steps {
-                sh "docker build -t nodeimage${env.BUILD_NUMBER} ."
-            }
+        steps {
+        sh "DOCKER_HOST=tcp://host.docker.internal:2375 docker build -t nodeimage${env.BUILD_NUMBER} ."
+                }
         }
         stage('Deploy to Localhost') {
             steps {
