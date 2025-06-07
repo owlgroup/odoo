@@ -9,11 +9,6 @@ pipeline {
                 git branch: '18.0', url: 'https://github.com/owlgroup/odoo.git'
             }
         }
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t khoadue.me/odoo-website:latest .'
-            }
-        }
         stage('Install Dependencies') {
             steps {
                 sh '''
@@ -22,6 +17,13 @@ pipeline {
                     pip install wheel
                     pip install -r requirements.txt
                 '''
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("nodeimage" + "$BUILD_NUMBER")
+                }
             }
         }
     }
