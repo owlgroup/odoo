@@ -24,14 +24,6 @@ pipeline {
                 sh 'docker build -t khoadue.me/odoo-website:latest .'
             }
         }
-        stage('Deploy to Docker') {
-            steps {
-                sh 'docker stop khoadue.me/odoo-website || true'
-                sh 'docker rm khoadue.me/odoo-website || true'
-                sh 'docker run -d --name khoadue.me/odoo-website -p 8069:8069 khoadue.me/odoo-website:latest'
-            }
-        }
-    }
     post {
         success {
             echo '✅ Build and deployment success!'
