@@ -5,14 +5,16 @@ pipeline {
     }
     environment {
         DOCKER_HOST = 'tcp://host.docker.internal:2375' // Kết nối với Docker Desktop
-        DOCKER_TLS_VERIFY = '' // Tắt TLS để khớp với cổng 2375
-        DOCKER_CERT_PATH = '' // Xóa DOCKER_CERT_PATH vì không dùng TLS
+        DOCKER_TLS_VERIFY = '' // Tắt TLS
+        DOCKER_CERT_PATH = '' // Xóa đường dẫn chứng chỉ
     }
     stages {
         stage('Debug Environment') {
             steps {
                 sh '''
                     echo "Checking environment..."
+                    unset DOCKER_TLS_VERIFY
+                    unset DOCKER_CERT_PATH
                     env | grep -E 'DOCKER|GIT'
                     docker info
                     ping -c 4 github.com
