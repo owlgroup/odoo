@@ -4,9 +4,7 @@ pipeline {
         IMAGE_NAME = "odoo-website" // Tên image cố định
         IMAGE_TAG = "${env.IMAGE_NAME}:${env.BUILD_NUMBER}" // Tag image với build number
         DOCKER_REGISTRY = 'https://index.docker.io/v1/' // Registry URL
-        DOCKER_CREDENTIALS_ID = 'docker-key' // ID của credentials trong Jenkins
-        // Nếu Docker daemon chạy trên cùng máy, không cần DOCKER_HOST
-        // DOCKER_HOST = 'tcp://192.168.1.117:2375' // Chỉ dùng nếu cần
+        DOCKER_CREDENTIALS_ID = 'docker-hub' // ID của credentials trong Jenkins (đảm bảo khớp với cấu hình của bạn)
     }
     stages {
         stage('Check Docker Environment') {
@@ -26,6 +24,7 @@ pipeline {
                 script {
                     // Build Docker image
                     sh "docker build -t ${IMAGE_TAG} ."
+                    echo "Docker image ${IMAGE_TAG} built successfully"
                 }
             }
         }
@@ -33,6 +32,7 @@ pipeline {
             steps {
                 withDockerRegistry(credentialsId: "${DOCKER_CREDENTIALS_ID}", url: "${DOCKER_REGISTRY}") {
                     sh "docker push ${IMAGE_TAG}"
+                    echo "Docker image ${IMAGE_TAG} pushed to DockerHub"
                 }
             }
         }
@@ -44,13 +44,36 @@ pipeline {
                         sh '''
                             docker stop odoo-website || true
                             docker rm odoo-website || true
+                            docker stop postgres-odoo || true
+                            docker rm postgres-odoo || true
                         '''
-                        // Chạy container mới
-                        sh "docker run -d --name odoo-website -p 8069:8069 ${IMAGE_TAG}"
+                        // Chạy container PostgreSQL cho Odoo
+                        sh '''
+                            docker run -d --name postgres-odoo \
+                            -e POSTGRES_DB=odoo \
+                            -e POSTGRES_USER=odoo \
+                            -e POSTGRES_PASSWORD=odoo \
+                            -p 5432:5432 \
+                            postgres:13
+                        '''
+                        // Chạy container Odoo mới
+                        sh '''
+                            docker run -d --name odoo-website \
+                            --link postgres-odoo:postgres \
+                            -p 8069:8069 \
+                            ${IMAGE_TAG}
+                        '''
                         // Kiểm tra container có chạy không
-                        sleep 5 // Đợi vài giây để container khởi động
+                        sleep 10 // Đợi container khởi động
                         sh 'docker ps --filter "name=odoo-website" --format "{{.Names}}" | grep odoo-website'
-                        echo "Container odoo-website is running"
+                        sh 'docker ps --filter "name=postgres-odoo" --format "{{.Names}}" | grep postgres-odoo'
+                        echo "Container odoo-website and postgres-odoo are running"
+                        // Kiểm tra log của container Odoo
+                        sh 'docker logs odoo-website'
+                        // Kiểm tra port 8069
+                        sh 'netstat -tuln | grep 8069 || echo "Port 8069 not found, check container logs"'
+                        // Kiểm tra kết nối tới Odoo
+                        sh 'curl -s -f http://localhost:8069 || echo "Cannot connect to Odoo on port 8069, check logs"'
                     } catch (Exception e) {
                         error "Deployment failed: ${e.message}"
                     }
@@ -61,13 +84,14 @@ pipeline {
     post {
         success {
             echo '✅ Xây dựng và triển khai thành công!'
+            echo 'Truy cập Odoo tại: http://<jenkins-ip>:8069 (hoặc http://localhost:8069 nếu chạy local)'
             // Có thể thêm thông báo qua Slack, email, v.v.
-            // Ví dụ: slackSend(channel: '#devops', message: "Build #${env.BUILD_NUMBER} deployed successfully!")
+            // slackSend(channel: '#devops', message: "Build #${env.BUILD_NUMBER} deployed successfully!")
         }
         failure {
             echo '❌ Xây dựng hoặc triển khai thất bại.'
             // Có thể thêm thông báo lỗi
-            // Ví dụ: slackSend(channel: '#devops', message: "Build #${env.BUILD_NUMBER} failed!")
+            // slackSend(channel: '#devops', message: "Build #${env.BUILD_NUMBER} failed!")
         }
         always {
             // Dọn dẹp các image không cần thiết để tiết kiệm không gian
